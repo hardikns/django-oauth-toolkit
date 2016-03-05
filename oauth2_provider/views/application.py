@@ -2,7 +2,7 @@ from django.core.urlresolvers import reverse_lazy
 from django.forms.models import modelform_factory
 from django.views.generic import CreateView, DetailView, DeleteView, ListView, UpdateView
 
-from braces.views import LoginRequiredMixin
+from braces.views import LoginRequiredMixin, PermissionRequiredMixin
 
 from ..models import get_application_model
 
@@ -17,10 +17,12 @@ class ApplicationOwnerIsUserMixin(LoginRequiredMixin):
         return get_application_model().objects.filter(user=self.request.user)
 
 
-class ApplicationRegistration(LoginRequiredMixin, CreateView):
+class ApplicationRegistration(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     """
     View used to register a new Application for the request.user
     """
+    permission_required = "oauth2_provider.add_application"
+    raise_exception = True
     template_name = "oauth2_provider/application_registration_form.html"
 
     def get_form_class(self):

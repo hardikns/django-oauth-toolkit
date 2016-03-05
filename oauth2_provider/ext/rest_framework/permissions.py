@@ -11,6 +11,20 @@ log = logging.getLogger('oauth2_provider')
 
 SAFE_HTTP_METHODS = ['GET', 'HEAD', 'OPTIONS']
 
+def get_client_ip(request):
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0]
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    print ip
+    return ip
+
+def format_ip(value):
+    try: 
+        return '.'.join(map(lambda x: str(int(x)), value.split('.')))
+    except:
+        return '' 
 
 class TokenHasScope(BasePermission):
     """
@@ -27,7 +41,15 @@ class TokenHasScope(BasePermission):
             required_scopes = self.get_scopes(request, view)
             log.debug("Required scopes to access resource: {0}".format(required_scopes))
 
-            return token.is_valid(required_scopes)
+            if not token.is_valid(required_scopes):
+                return False
+
+            if token.application.authorization_grant_type in ['password','client-credentials'] and \
+               get_client_ip(request) not in map(format_ip, token.application.server_ips.split('\n')):
+                print "missing not matched {0} - {1}".format(get_client_ip(request),token.application.server_ips)
+                return False
+
+            return True
 
         assert False, ('TokenHasScope requires either the'
                        '`oauth2_provider.rest_framework.OAuth2Authentication` authentication '

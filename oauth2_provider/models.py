@@ -13,7 +13,7 @@ from django.core.exceptions import ImproperlyConfigured
 from .settings import oauth2_settings
 from .compat import AUTH_USER_MODEL, parse_qsl, urlparse, get_model
 from .generators import generate_client_secret, generate_client_id
-from .validators import validate_uris
+from .validators import validate_uris, validate_ips
 
 
 @python_2_unicode_compatible
@@ -68,6 +68,8 @@ class AbstractApplication(models.Model):
                                      default=generate_client_secret, db_index=True)
     name = models.CharField(max_length=255, blank=True)
     skip_authorization = models.BooleanField(default=False)
+    server_ips = models.TextField(validators=[validate_ips], 
+        help_text=_("Allowed list of Server IP address on separate lines"), blank=True)
 
     class Meta:
         abstract = True
@@ -115,6 +117,13 @@ class AbstractApplication(models.Model):
                 AbstractApplication.GRANT_IMPLICIT):
             error = _('Redirect_uris could not be empty with {0} grant_type')
             raise ValidationError(error.format(self.authorization_grant_type))
+        if not self.server_ips \
+            and self.authorization_grant_type \
+            in (self.GRANT_PASSWORD,
+                self.GRANT_CLIENT_CREDENTIALS):
+            error = _('Server_ips could not be empty with {0} grant_type')
+            raise ValidationError(error.format(self.authorization_grant_type))
+
 
     def get_absolute_url(self):
         return reverse('oauth2_provider:detail', args=[str(self.id)])
