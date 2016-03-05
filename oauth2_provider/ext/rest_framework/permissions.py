@@ -17,7 +17,6 @@ def get_client_ip(request):
         ip = x_forwarded_for.split(',')[0]
     else:
         ip = request.META.get('REMOTE_ADDR')
-    print ip
     return ip
 
 def format_ip(value):
@@ -46,7 +45,7 @@ class TokenHasScope(BasePermission):
 
             if token.application.authorization_grant_type in ['password','client-credentials'] and \
                get_client_ip(request) not in map(format_ip, token.application.server_ips.split('\n')):
-                print "missing not matched {0} - {1}".format(get_client_ip(request),token.application.server_ips)
+                log.debug("missing not matched {0} - {1}".format(get_client_ip(request),token.application.server_ips))
                 return False
 
             return True
