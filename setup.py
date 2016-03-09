@@ -54,6 +54,7 @@ setup(
         'django-braces>=1.8.1',
         'oauthlib==1.0.3',
         'six',
+        'iptools==0.6.1',
     ],
     zip_safe=False,
 )
