@@ -5,6 +5,7 @@ from django.core.exceptions import ImproperlyConfigured
 from rest_framework.permissions import BasePermission
 
 from ...settings import oauth2_settings
+from iptools import IpRangeList
 
 
 log = logging.getLogger('oauth2_provider')
@@ -18,12 +19,6 @@ def get_client_ip(request):
     else:
         ip = request.META.get('REMOTE_ADDR')
     return ip
-
-def format_ip(value):
-    try: 
-        return '.'.join(map(lambda x: str(int(x)), value.split('.')))
-    except:
-        return '' 
 
 class TokenHasScope(BasePermission):
     """
@@ -44,7 +39,7 @@ class TokenHasScope(BasePermission):
                 return False
 
             if token.application.authorization_grant_type in ['password','client-credentials'] and \
-               get_client_ip(request) not in map(format_ip, token.application.server_ips.split('\n')):
+               get_client_ip(request) not in IpRangeList(*map(lambda x: x.strip(), token.application.server_ips.split('\n'))):
                 log.debug("missing not matched {0} - {1}".format(get_client_ip(request),token.application.server_ips))
                 return False
 

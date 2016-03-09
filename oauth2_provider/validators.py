@@ -65,12 +65,8 @@ def validate_uris(value):
         v(uri)
 
 def validate_ips(value):
-    def validate_single_ip(val):
-        ip_parts = val.strip().split('.') 
-        assert len(ip_parts) == 4
-        assert all(map(lambda x: int(x) < 255, ip_parts))
-    
+    from iptools import IpRangeList
     try:
-        ips = map(validate_single_ip, value.split('\n'))
+        ips = IpRangeList(*map(lambda x:x.strip(), value.split('\n')))
     except:
         raise ValidationError(_("Not a valid IP address"))
