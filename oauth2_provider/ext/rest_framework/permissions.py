@@ -12,13 +12,20 @@ log = logging.getLogger('oauth2_provider')
 
 SAFE_HTTP_METHODS = ['GET', 'HEAD', 'OPTIONS']
 
+def is_ipaddress(ip_text):
+    try:
+        IpRangeList(ip_text.strip())
+    except:
+        return False
+    return True
+
 def get_client_ip(request):
     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
     if x_forwarded_for:
-        ip = x_forwarded_for.split(',')[0]
+        ip = filter(is_ipaddress, x_forwarded_for.split(','))[0]
     else:
         ip = request.META.get('REMOTE_ADDR')
-    return ip
+    return ip.strip()
 
 class TokenHasScope(BasePermission):
     """
