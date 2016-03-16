@@ -4,7 +4,7 @@ from .models import Grant, AccessToken, RefreshToken, get_application_model
 
 class ApplicationAdmin(admin.ModelAdmin):
     raw_id_fields = ('user',)
-    fields = ('name', 'client_id', 'client_secret', 'client_type', 'authorization_grant_type', 'redirect_uris', 'server_ips', 'skip_authorization')
+    fields = ('name', 'client_id', 'client_secret', 'client_type', 'authorization_grant_type', 'redirect_uris', 'server_ips', 'skip_authorization', 'user',)
 
 class RawIDAdmin(admin.ModelAdmin):
     raw_id_fields = ('user',)
