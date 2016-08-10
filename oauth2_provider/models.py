@@ -71,6 +71,7 @@ class AbstractApplication(models.Model):
     server_ips = models.TextField(validators=[validate_ips], 
         help_text=_("Allowed list of Server IP address on separate lines"), blank=True)
     require_email_verification = models.BooleanField(default=False)
+    display_on_profile = models.BooleanField(default=False)
 
     class Meta:
         abstract = True
